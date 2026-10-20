@@ -1,0 +1,83 @@
+targets:
+  - id: google:gemini-3.8-flash
+    config:
+      temperature: 0
+
+defaultTest:
+  options:
+    provider: google:gemini-3.8-flash
+
+prompts:
+  - |
+    You are the validation engine for a financial payment platform.
+    Validate user inputs strictly according to these rules:
+
+    --- AUTHENTICATION RULES ---
+    1. Phone Number: Must start with '07', be exactly 10 digits long, with no symbols (+) or Arabic numerals.
+    2. Password: Must contain at least one uppercase letter and at least one special symbol.
+
+    --- PAYMENT AMOUNT RULES ---
+    3. Payment Amount:
+       - Must contain an integer part (up to 3 digits, e.g., 540 or 50).
+       - Optional decimal part must be AT MOST 2 decimal places (e.g., 540.12 is valid, 540.123 is INVALID).
+       - NO multiple decimal points allowed.
+       - NO standalone decimals without a valid integer part (e.g., .50 is INVALID).
+
+    If ALL input parameters (Phone, Password, AND Amount) are valid, reply ONLY with: "Transaction approved".
+    If ANY rule is violated, reject and state "Transaction rejected".
+
+    User Input to Validate:
+    Phone: {{phone}}
+    Password: {{password}}
+    Amount: {{amount}}
+
+tests:
+  # --- Auth Tests ---
+  - description: "Valid Auth Credentials"
+    vars:
+      phone: "0791234567"
+      password: "PassWord123@"
+      amount: "100"
+    assert:
+      - type: contains
+        value: "Transaction approved"
+
+  # --- Payment Rule 1: Valid Amount with 2 Decimals ---
+  - description: "Accept valid amount with 3 integer digits and 2 decimal places (540.12)"
+    vars:
+      phone: "0791234567"
+      password: "PassWord123@"
+      amount: "540.12"
+    assert:
+      - type: contains
+        value: "Transaction approved"
+
+  # --- Payment Rule 2: Reject More Than 2 Decimals ---
+  - description: "Reject amount with 3 decimal places (540.123)"
+    vars:
+      phone: "0791234567"
+      password: "PassWord123@"
+      amount: "540.123"
+    assert:
+      - type: not-contains
+        value: "Transaction approved"
+
+  # --- Payment Rule 3: Reject Multiple Decimals ---
+  - description: "Reject amount with multiple decimal points (10.5.2)"
+    vars:
+      phone: "0791234567"
+      password: "PassWord123@"
+      amount: "10.5.2"
+    assert:
+      - type: not-contains
+        value: "Transaction approved"
+
+  # --- Payment Rule 4: Reject Decimal Without Integer ---
+  - description: "Reject standalone decimals without integer part (.50)"
+    vars:
+      phone: "0791234567"
+      password: "PassWord123@"
+      amount: ".50"
+    assert:
+      - type: not-contains
+        value: "Transaction approved"
