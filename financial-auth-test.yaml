@@ -13,15 +13,16 @@ prompts:
     Validate user inputs strictly according to these rules:
 
     --- AUTHENTICATION RULES ---
-    1. Phone Number: Must start with '07', be exactly 10 digits long, with no symbols (+) or Arabic numerals.
-    2. Password: Must contain at least one uppercase letter and at least one special symbol.
+    1. Phone Number: Must start with '07', be exactly 10 digits long, contain only English numerals (0-9), and no symbols (+).
+    2. Password: Must contain at least one uppercase letter, at least one special symbol, and no spaces.
 
     --- PAYMENT AMOUNT RULES ---
     3. Payment Amount:
-       - Must contain an integer part (up to 3 digits, e.g., 540 or 50).
+       - Must contain an integer part (up to 3 digits, e.g., 540, 50, or boundary maximum 999.99).
        - Optional decimal part must be AT MOST 2 decimal places (e.g., 540.12 is valid, 540.123 is INVALID).
        - NO multiple decimal points allowed.
-       - NO standalone decimals without a valid integer part (e.g., .50 is INVALID).
+       - NO standalone decimals without an integer part (e.g., .50 is INVALID).
+       - Amount exceeding 999.99 (e.g., 1000) or empty/zero is INVALID.
 
     If ALL input parameters (Phone, Password, AND Amount) are valid, reply ONLY with: "Transaction approved".
     If ANY rule is violated, reject and state "Transaction rejected".
@@ -32,52 +33,86 @@ prompts:
     Amount: {{amount}}
 
 tests:
-  # --- Auth Tests ---
-  - description: "Valid Auth Credentials"
-    vars:
+  # --- Valid / Edge Cases (Should Approve) ---
+  - vars:
       phone: "0791234567"
-      password: "PassWord123@"
-      amount: "100"
-    assert:
-      - type: contains
-        value: "Transaction approved"
-
-  # --- Payment Rule 1: Valid Amount with 2 Decimals ---
-  - description: "Accept valid amount with 3 integer digits and 2 decimal places (540.12)"
-    vars:
-      phone: "0791234567"
-      password: "PassWord123@"
+      password: "Password123@"
       amount: "540.12"
     assert:
       - type: contains
         value: "Transaction approved"
 
-  # --- Payment Rule 2: Reject More Than 2 Decimals ---
-  - description: "Reject amount with 3 decimal places (540.123)"
-    vars:
-      phone: "0791234567"
-      password: "PassWord123@"
-      amount: "540.123"
+  - vars:
+      phone: "0788888888"
+      password: "SecurePass#2026"
+      amount: "999.99"
     assert:
-      - type: not-contains
+      - type: contains
         value: "Transaction approved"
 
-  # --- Payment Rule 3: Reject Multiple Decimals ---
-  - description: "Reject amount with multiple decimal points (10.5.2)"
-    vars:
-      phone: "0791234567"
-      password: "PassWord123@"
-      amount: "10.5.2"
+  # --- Invalid Phone Number Cases ---
+  - vars:
+      phone: "0891234567"
+      password: "Password123@"
+      amount: "540.12"
     assert:
-      - type: not-contains
-        value: "Transaction approved"
+      - type: contains
+        value: "Transaction rejected"
 
-  # --- Payment Rule 4: Reject Decimal Without Integer ---
-  - description: "Reject standalone decimals without integer part (.50)"
-    vars:
+  - vars:
+      phone: "079123456"
+      password: "Password123@"
+      amount: "540.12"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
+
+  - vars:
+      phone: "٠٧٩١٢٣٤٥٦٧"
+      password: "Password123@"
+      amount: "540.12"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
+
+  # --- Invalid Password Cases ---
+  - vars:
       phone: "0791234567"
-      password: "PassWord123@"
+      password: "password123@"
+      amount: "540.12"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
+
+  - vars:
+      phone: "0791234567"
+      password: "Password123"
+      amount: "540.12"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
+
+  # --- Invalid Amount Cases ---
+  - vars:
+      phone: "0791234567"
+      password: "Password123@"
+      amount: "1000"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
+
+  - vars:
+      phone: "0791234567"
+      password: "Password123@"
       amount: ".50"
     assert:
-      - type: not-contains
-        value: "Transaction approved"
+      - type: contains
+        value: "Transaction rejected"
+
+  - vars:
+      phone: "0791234567"
+      password: "Password123@"
+      amount: "540.123"
+    assert:
+      - type: contains
+        value: "Transaction rejected"
