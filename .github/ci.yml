@@ -2,9 +2,10 @@ name: AI Financial QA CI Automation
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -26,3 +27,4 @@ jobs:
       env:
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       run: npx promptfoo eval -c financial-auth-test.yaml --concurrency 1
+      
