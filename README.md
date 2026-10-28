@@ -39,3 +39,4 @@ Large Language Models (LLMs) used in financial applications must adhere to stric
    ```bash
    git clone [https://github.com/ayhamewidat-blip/AI-financial-QA-Test.git]
    cd AI-financial-QA-Test
+   Auto run
