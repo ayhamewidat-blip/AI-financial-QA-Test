@@ -20,10 +20,7 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Install Dependencies
-      run: npm install
-
     - name: Run Promptfoo Evaluation
       env:
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      run: npx promptfoo eval -c financial-auth-test.yaml --concurrency 1
+      run: npx --yes promptfoo@latest eval -c financial-auth-test.yaml --concurrency 1
