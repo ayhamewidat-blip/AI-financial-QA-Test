@@ -1,0 +1,24 @@
+{
+  "name": "ai-financial-qa-test",
+  "version": "1.0.0",
+  "description": "An automated **AI Quality Assurance (QA)** evaluation framework designed to test and validate strict business logic for financial authentication and payment systems using **Promptfoo** and **Google Gemini (`gemini-3.8-flash`)**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayhamewidat-blip/AI-financial-QA-Test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ayhamewidat-blip/AI-financial-QA-Test/issues"
+  },
+  "homepage": "https://github.com/ayhamewidat-blip/AI-financial-QA-Test#readme",
+  "devDependencies": {
+    "promptfoo": "^0.125.1"
+  }
+}
